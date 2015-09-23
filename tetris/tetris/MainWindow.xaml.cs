@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -21,6 +22,7 @@ namespace tetris
         public const int Height = 15;
         public int linesCompleted = 0;
         public int linesRecord = 0;
+        public int tick = 300;
 
         Timer timer;
         private  int x = 0;
@@ -93,14 +95,16 @@ namespace tetris
 
         public MainWindow()
         {
+
+            this.tick = Convert.ToInt32(ConfigurationManager.AppSettings["tick"]);
+
             InitializeComponent();
             InitBoard();
             DrawBoard();
-            
-            timer = new Timer(Callback, null, 1000, 1000);
+
+            timer = new Timer(Callback, null, 1000, tick);
 
         }
-
 
         private void DrawNextFigure()
         {
@@ -209,8 +213,6 @@ namespace tetris
 
         }
 
-
-
         public Board Board = new Board();
 
         private void Grid_OnKeyDown(object sender, KeyEventArgs e)
@@ -234,17 +236,20 @@ namespace tetris
                     break;
 
                 case Key.A:
-                    var testFigure = new Figure
+                    if (Board.ActiveFigure != null)
                     {
-                        Tiles = Board.ActiveFigure.Tiles.Select(tile => new Tile(tile.X, tile.Y)).ToList(),
-                        Y = Board.ActiveFigure.Y, X = Board.ActiveFigure.X
-                    };
+                        var testFigure = new Figure
+                        {
+                            Tiles = Board.ActiveFigure.Tiles.Select(tile => new Tile(tile.X, tile.Y)).ToList(),
+                            Y = Board.ActiveFigure.Y, X = Board.ActiveFigure.X
+                        };
 
-                    RotateFigure(Direction.Right, testFigure);
+                        RotateFigure(Direction.Right, testFigure);
 
-                    if (CheckBounds(testFigure)) 
-                        RotateFigure(Direction.Right);
-                    
+                        if (CheckBounds(testFigure)) 
+                            RotateFigure(Direction.Right);
+                    }
+
                     break;
 
             }
@@ -315,7 +320,6 @@ namespace tetris
         {
             if (Board.ActiveFigure == null && figure == null) return false;
 
-
             if (figure == null) figure = Board.ActiveFigure;
 
             if (figure.Tiles.Any(tile => Board.Tiles.Any(tile1 => figure.X + tile.X == tile1.X && figure.Y + tile.Y  == tile1.Y)))
@@ -369,8 +373,6 @@ namespace tetris
                         return false;
                     break;
             }
-
-
             return true;
         }
 
@@ -386,7 +388,7 @@ namespace tetris
             DrawTiles();
             Board.ActiveFigure = null;
             linesCompleted = 0;
-            timer.Change(0, 1000);
+            timer.Change(0, tick);
             
         }
     }
