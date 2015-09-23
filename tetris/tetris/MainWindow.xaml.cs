@@ -192,25 +192,15 @@ namespace tetris
                 int y = tile.Y;
 
 
-                if (x < 0 && y < 0)
+                if (x <= 0 && y < 0 || x >= 0 && y > 0)
                 {
                     tile.X = y;
                     tile.Y = -1*x;
                 }
-                else if (x < 0 && y >= 0)
+                else 
                 {
-                    tile.Y = x;
-                    tile.X = y * -1;
-                }
-                else if (x >= 0 && y >= 0)
-                {
-                    tile.Y = x*-1;
+                    tile.Y = x * -1;
                     tile.X = y;
-                }
-                else if (x >= 0 && y < 0)
-                {
-                    tile.Y = x;
-                    tile.X = y * -1;                    
                 }
 
             });
