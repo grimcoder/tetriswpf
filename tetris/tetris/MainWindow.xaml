@@ -8,7 +8,10 @@
         
         <Grid x:Name="Grid" Background="Black"></Grid>    
         <Grid x:Name="TilesGrid"></Grid>
-    
+        <Grid x:Name="ActiveFigureGrid"></Grid>
+                <Grid.LayoutTransform>
+                    <ScaleTransform ScaleY="-1"></ScaleTransform>
+                </Grid.LayoutTransform>
     
     </Grid>
     

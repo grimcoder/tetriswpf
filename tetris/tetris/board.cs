@@ -15,8 +15,21 @@ namespace tetris
         public Figure ActiveFigure;
     }
 
+    public enum Orientation
+    {
+        Horizontal,
+        Vertical
+
+    }
+
     public class Figure
     {
+        public Orientation Orientation;
+
+        public Figure()
+        {
+            this.Orientation = Orientation.Horizontal;
+        }
         public void RotateLeft()
         {}
 
@@ -25,6 +38,9 @@ namespace tetris
 
         public List<Tile> Tiles;
 
+
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 
     public class Tile
@@ -39,5 +55,13 @@ namespace tetris
 
         public int Y;
 
+    }
+
+    public enum Direction
+    {
+        Right,
+        Up,
+        Down,
+        Left
     }
 }
