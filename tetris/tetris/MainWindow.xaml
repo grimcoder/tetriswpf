@@ -14,7 +14,7 @@
         
         
         <Grid Width="515"  HorizontalAlignment="Left">
-             <Grid x:Name="Grid" Background="Black"></Grid>    
+             <Grid x:Name="Grid" Background="LightPink"></Grid>    
             <Grid x:Name="TilesGrid"></Grid>
             <Grid x:Name="ActiveFigureGrid"></Grid>        
             
@@ -25,18 +25,30 @@
         
         <Grid Grid.Column="1">
             <StackPanel VerticalAlignment="Center" Margin="20" Orientation="Vertical">
-            
+
                 <StackPanel HorizontalAlignment="Center" 
                         VerticalAlignment="Center" Orientation="Horizontal">
-                <TextBlock FontSize="20" >Lines: </TextBlock>
-                <TextBlock FontSize="20" x:Name="LinesNumber" Text="0" Foreground="OrangeRed"></TextBlock>
-            </StackPanel>          
-                
+                    <TextBlock FontSize="20" >Lines:</TextBlock>
+                    <TextBlock FontSize="20" x:Name="LinesNumber" Text="0" Foreground="OrangeRed"></TextBlock>
+                </StackPanel>
+
                 <StackPanel HorizontalAlignment="Center" Margin="20" 
                         VerticalAlignment="Center" Orientation="Horizontal">
                     <TextBlock FontSize="20" >Record: </TextBlock>
                 <TextBlock FontSize="20" x:Name="LinesRecord" Text="0"  Foreground="OrangeRed"></TextBlock>
             </StackPanel>
+                
+                
+                <Grid>
+
+                    <Grid x:Name="nextGrig">
+                        <Grid.LayoutTransform>
+                            <ScaleTransform ScaleY="-1"></ScaleTransform>
+                        </Grid.LayoutTransform>
+
+                    </Grid>
+
+                </Grid>
             <Button HorizontalAlignment="Center" FontSize="20" Click="StartAgain">Start again</Button>
             </StackPanel>
         </Grid>

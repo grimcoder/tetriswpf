@@ -13,6 +13,7 @@ namespace tetris
         public List<Tile> Tiles = new List<Tile>();
 
         public Figure ActiveFigure;
+        public Figure NextFigure { get; set; }
     }
 
     public enum Orientation

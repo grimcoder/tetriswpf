@@ -30,7 +30,11 @@ namespace tetris
             {
                 if (Board.ActiveFigure == null)
                 {
-                    Board.ActiveFigure = Figure.GetFigure((Figures)new Random().Next(0,5));
+                    Board.ActiveFigure = Board.NextFigure ?? Figure.GetFigure((Figures)new Random().Next(0, 5));
+                    Board.NextFigure = Figure.GetFigure((Figures)new Random().Next(0, 5));
+                    Board.NextFigure.X = 2;
+                    Board.NextFigure.Y = 2;
+                    DrawNextFigure();
 
                     Board.ActiveFigure.X = Board.Width/2;
                     Board.ActiveFigure.Y = Board.Height - 2;
@@ -79,6 +83,8 @@ namespace tetris
                     Board.Tiles.Where(tile => tile.Y > y).ToList().ForEach(tile => tile.Y--);
                     linesCompleted++;
                     LinesNumber.Text = linesCompleted.ToString();
+                    if (linesRecord < linesCompleted) linesRecord = linesCompleted;
+                    LinesRecord.Text = linesRecord.ToString();
                     y--;
                 }
             }
@@ -95,6 +101,25 @@ namespace tetris
 
         }
 
+
+        private void DrawNextFigure()
+        {
+            nextGrig.Children.Clear();
+
+                        if (Board.ActiveFigure != null)
+                foreach (var tile in Board.NextFigure.Tiles)
+                {
+                    Border border = new Border();
+                    nextGrig.Children.Add(border);
+                    border.Width = Size - Padding * 2;
+                    border.Height = Size - Padding * 2;
+                    Grid.SetRow(border, tile.Y + Board.NextFigure.Y);
+                    Grid.SetColumn(border, tile.X + Board.NextFigure.X);
+                    border.Background = new SolidColorBrush(Colors.OrangeRed);
+                    border.Padding = new Thickness(0);
+                }
+        }
+
         private void DrawTiles()
         {
             TilesGrid.Children.Clear();
@@ -104,12 +129,9 @@ namespace tetris
                 foreach (var tile in Board.Tiles)
                 {
                     Border border = new Border();
-
                     TilesGrid.Children.Add(border);
-
                     border.Width = Size - Padding*2;
                     border.Height = Size - Padding*2;
-
                     Grid.SetRow(border, tile.Y);
                     Grid.SetColumn(border, tile.X);
                     border.Background = new SolidColorBrush(Colors.Orange);
@@ -120,18 +142,13 @@ namespace tetris
                 foreach (var tile in Board.ActiveFigure.Tiles)
                 {
                     Border border = new Border();
-
                     ActiveFigureGrid.Children.Add(border);
-
                     border.Width = Size - Padding * 2;
                     border.Height = Size - Padding * 2;
-
                     Grid.SetRow(border, tile.Y + Board.ActiveFigure.Y);
                     Grid.SetColumn(border, tile.X + Board.ActiveFigure.X);
-
                     border.Background = new SolidColorBrush(Colors.OrangeRed);
                     border.Padding = new Thickness(0);
-
                 }
         }
 
@@ -179,7 +196,20 @@ namespace tetris
                     border.Padding = new Thickness(0);
                 }
             }
+
+            for (int x = 0; x < 5; x++)
+            {
+                nextGrig.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(Size) });
+            }
+
+            for (int x = 0; x < 5; x++)
+            {
+                nextGrig.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(Size) });
+            }
+
         }
+
+
 
         public Board Board = new Board();
 
@@ -348,6 +378,7 @@ namespace tetris
         private void StartAgain(object sender, RoutedEventArgs e)
         {
             Announcement.Visibility = Visibility.Hidden;
+            if (linesRecord < linesCompleted) linesRecord = linesCompleted;
             LinesRecord.Text = linesRecord.ToString();
             LinesNumber.Text = 0.ToString();
             
