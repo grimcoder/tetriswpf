@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,29 +11,87 @@ using System.Windows.Media;
 
 namespace tetris
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+
     public partial class MainWindow : Window
     {
 
         public const int Size = 50;
         public const int Padding = 1;
         public const int Width = 10;
-        public const int Height = 10;
+        public const int Height = 15;
+        public int linesCompleted = 0;
+        public int linesRecord = 0;
+
+        Timer timer;
+        private  int x = 0;
+        private void Callback(object state)
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (Board.ActiveFigure == null)
+                {
+                    Board.ActiveFigure = Figure.GetFigure((Figures)new Random().Next(0,5));
+
+                    Board.ActiveFigure.X = Board.Width/2;
+                    Board.ActiveFigure.Y = Board.Height - 2;
+                    DrawTiles();
+                    return;
+                }
+
+                if (CheckBounds(Direction.Down))
+                {
+                    Board.ActiveFigure.Y -= 1;
+                    DrawTiles();
+                    return;
+                }
+                else
+                {
+                    if (Board.ActiveFigure.Y < Board.Height - 2)
+                    {
+                        Board.Tiles.AddRange(Board.ActiveFigure.Tiles.Select(tile => new Tile(tile.X + Board.ActiveFigure.X, tile.Y + Board.ActiveFigure.Y)));
+                        Board.ActiveFigure = null;
+                        RemoveLines();
+                        return;
+                    }
+                    else
+                    {
+                        if (linesRecord < linesCompleted) linesRecord = linesCompleted;
+                        LinesRecord.Text = linesRecord.ToString();
+                        Board.ActiveFigure = null;
+                        Board.Tiles = new List<Tile>();
+                        linesCompleted = 0;
+                        timer.Change(int.MaxValue, 0);
+                        Announcement.Text = "Finita la comedia!!";
+                        Announcement.Visibility = Visibility.Visible;
+                    }
+                }
+
+            });
+        }
+
+        private void RemoveLines()
+        {
+            for (int y = 0; y < Board.Height; y++)
+            {
+                if (Board.Tiles.Count(tile => tile.Y == y) == Board.Width)
+                {
+                    Board.Tiles = Board.Tiles.Where(tile => tile.Y != y).ToList();
+                    Board.Tiles.Where(tile => tile.Y > y).ToList().ForEach(tile => tile.Y--);
+                    linesCompleted++;
+                    LinesNumber.Text = linesCompleted.ToString();
+                    y--;
+                }
+            }
+
+        }
 
         public MainWindow()
         {
             InitializeComponent();
             InitBoard();
             DrawBoard();
-
-            DrawTiles();
-
-
-            ///BackgroundWorker worker = new BackgroundWorker();
-
-
+            
+            timer = new Timer(Callback, null, 1000, 1000);
 
         }
 
@@ -41,39 +100,40 @@ namespace tetris
             TilesGrid.Children.Clear();
             ActiveFigureGrid.Children.Clear();
 
-            foreach (var tile in Board.Tiles)
-            {
-                Border border = new Border();
+            if (Board.Tiles != null)
+                foreach (var tile in Board.Tiles)
+                {
+                    Border border = new Border();
 
-                TilesGrid.Children.Add(border);
+                    TilesGrid.Children.Add(border);
 
-                border.Width = Size - Padding*2;
-                border.Height = Size - Padding*2;
+                    border.Width = Size - Padding*2;
+                    border.Height = Size - Padding*2;
 
-                Grid.SetRow(border, tile.Y);
-                Grid.SetColumn(border, tile.X);
-                border.Background = new SolidColorBrush(Colors.Orange);
-                border.Padding = new Thickness(0);
-            }
+                    Grid.SetRow(border, tile.Y);
+                    Grid.SetColumn(border, tile.X);
+                    border.Background = new SolidColorBrush(Colors.Orange);
+                    border.Padding = new Thickness(0);
+                }
 
-            foreach (var tile in Board.ActiveFigure.Tiles)
-            {
-                Border border = new Border();
+            if (Board.ActiveFigure != null)
+                foreach (var tile in Board.ActiveFigure.Tiles)
+                {
+                    Border border = new Border();
 
-                ActiveFigureGrid.Children.Add(border);
+                    ActiveFigureGrid.Children.Add(border);
 
-                border.Width = Size - Padding * 2;
-                border.Height = Size - Padding * 2;
+                    border.Width = Size - Padding * 2;
+                    border.Height = Size - Padding * 2;
 
-                Grid.SetRow(border, tile.Y + Board.ActiveFigure.Y);
-                Grid.SetColumn(border, tile.X + Board.ActiveFigure.X);
+                    Grid.SetRow(border, tile.Y + Board.ActiveFigure.Y);
+                    Grid.SetColumn(border, tile.X + Board.ActiveFigure.X);
 
-                border.Background = new SolidColorBrush(Colors.OrangeRed);
-                border.Padding = new Thickness(0);
+                    border.Background = new SolidColorBrush(Colors.OrangeRed);
+                    border.Padding = new Thickness(0);
 
-            }
+                }
         }
-
 
         public void InitBoard()
         {
@@ -81,38 +141,6 @@ namespace tetris
             Board.Height = Height;
 
             Board.Tiles = new List<Tile>();
-
-            Board.Tiles.AddRange(new []
-            {
-                new Tile(0, 0),
-                new Tile(1, 0),
-                new Tile(2, 0),
-                new Tile(3, 0),
-                new Tile(4, 0),
-                new Tile(5, 0),
-                new Tile(7, 0),
-                new Tile(8, 0),
-                new Tile(8, 1),
-                new Tile(8, 2),
-                new Tile(9, 0),
-            });
-
-
-            Board.ActiveFigure =
-                new Figure
-                {
-                    Tiles = new List<Tile>(new Tile[]
-                    {
-                        new Tile(-1, 0),
-                        new Tile(0, 0),
-                        new Tile(1, 0),
-                        new Tile(1, 1)
-                    })
-                };
-
-            Board.ActiveFigure.X = 5;
-            Board.ActiveFigure.Y = 5;
-
         }
 
         private void DrawBoard()
@@ -175,16 +203,27 @@ namespace tetris
                     MoveActiveFigure(Direction.Left);
                     break;
 
-                case Key.Space:
-                    RotateActiveFigure(Direction.Right);
+                case Key.A:
+                    var testFigure = new Figure
+                    {
+                        Tiles = Board.ActiveFigure.Tiles.Select(tile => new Tile(tile.X, tile.Y)).ToList(),
+                        Y = Board.ActiveFigure.Y, X = Board.ActiveFigure.X
+                    };
+
+                    RotateFigure(Direction.Right, testFigure);
+
+                    if (CheckBounds(testFigure)) 
+                        RotateFigure(Direction.Right);
+                    
                     break;
+
             }
         }
 
-        private void RotateActiveFigure(Direction direction)
+        private void RotateFigure(Direction direction, Figure figure = null)
         {
-
-            Board.ActiveFigure.Tiles.ForEach(tile =>
+            if (figure == null) figure = Board.ActiveFigure;
+            figure.Tiles.ForEach(tile =>
             {
                 //  What quadrant are you in ? 
 
@@ -204,8 +243,8 @@ namespace tetris
                 }
 
             });
-            
-            Board.ActiveFigure.Orientation = Board.ActiveFigure.Orientation == Orientation.Horizontal
+
+            figure.Orientation = figure.Orientation == Orientation.Horizontal
                 ? Orientation.Vertical
                 : Orientation.Horizontal;
 
@@ -222,23 +261,19 @@ namespace tetris
             {
                 
                 case Direction.Down:
-                    
                     Board.ActiveFigure.Y -= 1;
                     break;
 
                 case Direction.Up:
                     Board.ActiveFigure.Y += 1;
-
                     break;
                 
                 case Direction.Left:
                     Board.ActiveFigure.X -= 1;
-
                     break;
                 
                 case Direction.Right:
                     Board.ActiveFigure.X += 1;
-
                     break;
             }
 
@@ -246,28 +281,82 @@ namespace tetris
             return true;
         }
 
-        private bool CheckBounds(Direction direction)
+        private bool CheckBounds(Figure figure = null)
         {
+            if (Board.ActiveFigure == null && figure == null) return false;
+
+
+            if (figure == null) figure = Board.ActiveFigure;
+
+            if (figure.Tiles.Any(tile => Board.Tiles.Any(tile1 => figure.X + tile.X == tile1.X && figure.Y + tile.Y  == tile1.Y)))
+                return false;
+
+            if (figure.Tiles.Any(tile => figure.Y + tile.Y < 0)) return false;
+            if (figure.Tiles.Any(tile => figure.Y + tile.Y >= Board.Height)) return false;
+            if (figure.Tiles.Any(tile => figure.X + tile.X < 0)) return false;
+            if (figure.Tiles.Any(tile => figure.X + tile.X >= Board.Width)) return false;
+
+            return true;
+
+        }
+
+        private bool CheckBounds(Direction direction, Figure figure = null)
+        {
+
+            if (Board.ActiveFigure == null && figure == null) return false;
+            if (figure == null) figure = Board.ActiveFigure;
+
             switch (direction)
             {
                 case Direction.Down:
-                    if (Board.ActiveFigure.Tiles.Any(tile => Board.ActiveFigure.Y + tile.Y - 1 < 0)) return false;
+                    if (figure.Tiles.Any(tile => figure.Y + tile.Y - 1 < 0)) return false;
+
+                    if (figure.Tiles.Any(tile => Board.Tiles.Any(tile1 => figure.X + tile.X == tile1.X && figure.Y + tile.Y - 1 == tile1.Y)))
+                        return false;
+
                     break;
 
                 case Direction.Up:
-                    if (Board.ActiveFigure.Tiles.Any(tile => Board.ActiveFigure.Y + tile.Y + 1 >= Board.Height)) return false;
+                    if (figure.Tiles.Any(tile => figure.Y + tile.Y + 1 >= Board.Height)) return false;
+
+                    if (figure.Tiles.Any(tile => Board.Tiles.Any(tile1 => figure.X + tile.X == tile1.X && figure.Y + tile.Y + 1 == tile1.Y)))
+                        return false;
                     break;
 
                 case Direction.Left:
-                    if (Board.ActiveFigure.Tiles.Any(tile => Board.ActiveFigure.X + tile.X - 1 < 0)) return false;
+                    if (figure.Tiles.Any(tile => figure.X + tile.X - 1 < 0)) return false;
+
+
+                    if (figure.Tiles.Any(tile => Board.Tiles.Any(tile1 => figure.X + tile.X - 1 == tile1.X && figure.Y + tile.Y == tile1.Y)))
+                        return false;
                     break;
 
                 case Direction.Right:
-                    if (Board.ActiveFigure.Tiles.Any(tile => Board.ActiveFigure.X + tile.X + 1 >= Board.Width)) return false;
+                    if (figure.Tiles.Any(tile => figure.X + tile.X + 1 >= Board.Width)) return false;
+
+
+                    if (figure.Tiles.Any(tile => Board.Tiles.Any(tile1 => figure.X + tile.X + 1 == tile1.X && figure.Y + tile.Y == tile1.Y)))
+                        return false;
                     break;
             }
 
+
             return true;
+        }
+
+
+        private void StartAgain(object sender, RoutedEventArgs e)
+        {
+            Announcement.Visibility = Visibility.Hidden;
+            LinesRecord.Text = linesRecord.ToString();
+            LinesNumber.Text = 0.ToString();
+            
+            Board.Tiles = new List<Tile>();
+            DrawTiles();
+            Board.ActiveFigure = null;
+            linesCompleted = 0;
+            timer.Change(0, 1000);
+            
         }
     }
 }

@@ -22,8 +22,104 @@ namespace tetris
 
     }
 
-    public class Figure
+
+    public enum Figures
     {
+        Stick = 0,
+        Cube = 1,
+        Left = 2,
+        Rigth = 3,
+        RigthS = 4,
+        LeftS = 5,
+        
+    }
+
+
+
+public class Figure
+    {
+
+    public static Figure GetFigure(Figures f)
+    {
+        switch (f)
+        {
+                case Figures.Cube:
+                return new Figure
+                {
+                    Tiles = new List<Tile>(new Tile[]
+                    {
+                        new Tile(-1, -1),
+                        new Tile(-1, 0),
+                        new Tile(0, 0),
+                        new Tile(0, -1)
+                    })
+                };
+
+                case Figures.Stick:
+                return new Figure
+                {
+                    Tiles = new List<Tile>(new Tile[]
+                    {
+                        new Tile(-1, 0),
+                        new Tile(0, 0),
+                        new Tile(1, 0),
+                        new Tile(2, 0)
+                    })
+                };
+
+                case Figures.Left:
+                return new Figure
+                {
+                    Tiles = new List<Tile>(new Tile[]
+                    {
+                        new Tile(-1, 0),
+                        new Tile(0, 0),
+                        new Tile(1, 0),
+                        new Tile(1, 1)
+                    })
+                };
+
+                case Figures.Rigth:
+                return new Figure
+                {
+                    Tiles = new List<Tile>(new Tile[]
+                    {
+                        new Tile(-1, 0),
+                        new Tile(-1, 1),
+                        new Tile(0, 0),
+                        new Tile(1, 0)
+                    })
+                };
+
+                case Figures.RigthS:
+                return new Figure
+                {
+                    Tiles = new List<Tile>(new Tile[]
+                    {
+                        new Tile(-1, -1),
+                        new Tile(-1, 0),
+                        new Tile(0, 0),
+                        new Tile(0, 1)
+                    })  
+                };
+
+                case Figures.LeftS:
+                return new Figure
+                {
+                    Tiles = new List<Tile>(new Tile[]
+                    {
+                        new Tile(0, -1),
+                        new Tile(0, 0),
+                        new Tile(-1, 0),
+                        new Tile(-1, 1)
+                    })
+                };
+
+        }
+
+        return Figure.GetFigure(Figures.Cube);
+    }
+
         public Orientation Orientation;
 
         public Figure()
